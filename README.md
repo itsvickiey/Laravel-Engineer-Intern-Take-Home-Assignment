@@ -1,59 +1,196 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Task Management API — README
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Project Overview
 
-## About Laravel
+This is a **Task Management API** built with **Laravel** and **MySQL**, designed for the Laravel Engineer Intern Take-Home Assignment.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+It provides the following features:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. Create tasks  
+2. List tasks  
+3. Update task status  
+4. Delete tasks  
+5. Bonus: Daily task report  
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The API enforces rules such as **unique task titles per due date**, **status progression**, and **priority validation**.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Table Structure
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Table: tasks**
 
-## Laravel Sponsors
+| Column      | Type    | Description                     |
+|------------|--------|---------------------------------|
+| id         | integer | Primary key                     |
+| title      | string  | Task title                      |
+| due_date   | date    | Task deadline                  |
+| priority   | enum    | low, medium, high               |
+| status     | enum    | pending, in_progress, done      |
+| created_at | timestamp | Laravel default               |
+| updated_at | timestamp | Laravel default               |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Installation & Setup
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd <project-folder>
+```
 
-## Contributing
+### 2. Install Dependencies
+```bash
+composer install --optimize-autoloader --no-scripts --no-interaction
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Configure Environment
+- Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
+```
+- Update database configuration for Railway MySQL:
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=<RAILWAY_PRIVATE_DOMAIN>
+DB_PORT=3306
+DB_DATABASE=railway
+DB_USERNAME=root
+DB_PASSWORD=<RAILWAY_DB_PASSWORD>
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Generate Laravel key:
+```bash
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+### 4. Run Migrations
+```bash
+php artisan migrate
+```
+This creates the `tasks` table in your MySQL database.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Running Locally
+```bash
+php artisan serve
+```
+- Default URL: `http://127.0.0.1:8000`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## API Endpoints
+
+### 1. Create Task
+- **POST** `/api/tasks`  
+- **Body (JSON):**
+```json
+{
+  "title": "My First Task",
+  "due_date": "2026-04-01",
+  "priority": "high"
+}
+```
+- **Rules:**
+  - Title cannot duplicate for the same due date  
+  - Priority: low, medium, high  
+  - Due date must be today or later
+
+---
+
+### 2. List Tasks
+- **GET** `/api/tasks`  
+- **Optional Query:** `?status=pending`  
+- Sorted by priority (high → low) and due_date ascending
+
+---
+
+### 3. Update Task Status
+- **PATCH** `/api/tasks/{id}/status`  
+- **Body (JSON):**
+```json
+{
+  "status": "in_progress"
+}
+```
+- **Rules:**  
+  - Status must progress: pending → in_progress → done  
+  - Cannot skip or revert
+
+---
+
+### 4. Delete Task
+- **DELETE** `/api/tasks/{id}`  
+- **Rules:**  
+  - Only tasks with status `done` can be deleted
+
+---
+
+### 5. Daily Report (Bonus)
+- **GET** `/api/tasks/report?date=YYYY-MM-DD`  
+- Returns counts per priority and status for the given day
+
+**Example Response:**
+```json
+{
+  "date": "2026-04-01",
+  "summary": {
+    "high": {"pending": 2, "in_progress": 1, "done": 0},
+    "medium": {"pending": 1, "in_progress": 0, "done": 3},
+    "low": {"pending": 0, "in_progress": 0, "done": 1}
+  }
+}
+```
+
+---
+
+## Testing API (Railway Hosted)
+
+### 1. Using curl (Windows CMD)
+- **Create Task**
+```cmd
+curl -X POST "https://laravel-engineer-intern-take-home-assignment-production.up.railway.app/api/tasks" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"title\":\"My First Task\",\"due_date\":\"2026-04-01\",\"priority\":\"high\"}"
+```
+- **List Tasks**
+```cmd
+curl "https://laravel-engineer-intern-take-home-assignment-production.up.railway.app/api/tasks"
+```
+- **Update Status**
+```cmd
+curl -X PATCH "https://laravel-engineer-intern-take-home-assignment-production.up.railway.app/api/tasks/1/status" -H "Accept: application/json" -H "Content-Type: application/json" -d "{\"status\":\"in_progress\"}"
+```
+- **Delete Task**
+```cmd
+curl -X DELETE "https://laravel-engineer-intern-take-home-assignment-production.up.railway.app/api/tasks/1" -H "Accept: application/json"
+```
+- **Daily Report**
+```cmd
+curl "https://laravel-engineer-intern-take-home-assignment-production.up.railway.app/api/tasks/report?date=2026-04-01"
+```
+
+### 2. Using Postman
+- Import endpoints  
+- Send requests with JSON body  
+- Confirm responses match rules
+
+---
+
+## Deployment Instructions (Railway)
+
+1. Push code to GitHub  
+2. Connect Railway to repository  
+3. Set **environment variables** in Railway dashboard  
+4. Deploy project → Railway provides live URL  
+5. Run **migrations** on Railway database
+
+---
+
+## Evaluation Criteria Covered
+- Business rules correctly enforced  
+- Laravel best practices (Eloquent, Validation, Migrations)  
+- API readable, maintainable, and testable  
+- Hosted online with MySQL for testing
+
