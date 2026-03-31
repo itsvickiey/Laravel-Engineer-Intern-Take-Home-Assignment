@@ -36,8 +36,8 @@ The API enforces rules such as **unique task titles per due date**, **status pro
 
 ### 1. Clone the Repository
 ```bash
-git clone <your-repo-url>
-cd <project-folder>
+git clone https://github.com/itsvickiey/Laravel-Engineer-Intern-Take-Home-Assignment
+cd project-folder
 ```
 
 ### 2. Install Dependencies
@@ -94,6 +94,8 @@ php artisan serve
   "priority": "high"
 }
 ```
+![Create Task](https://github.com/user-attachments/assets/dbdc4906-f44a-40e4-9826-83b0acc37f64)
+
 - **Rules:**
   - Title cannot duplicate for the same due date  
   - Priority: low, medium, high  
@@ -105,7 +107,6 @@ php artisan serve
 - **GET** `/api/tasks`  
 - **Optional Query:** `?status=pending`  
 - Sorted by priority (high → low) and due_date ascending
-
 ---
 
 ### 3. Update Task Status
@@ -116,6 +117,8 @@ php artisan serve
   "status": "in_progress"
 }
 ```
+![update](https://github.com/user-attachments/assets/bd498079-a138-4583-99b1-a94bd64c6e23)
+
 - **Rules:**  
   - Status must progress: pending → in_progress → done  
   - Cannot skip or revert
@@ -126,12 +129,17 @@ php artisan serve
 - **DELETE** `/api/tasks/{id}`  
 - **Rules:**  
   - Only tasks with status `done` can be deleted
+  ![DELETE TASK](https://github.com/user-attachments/assets/0de30876-2a1d-48cf-8393-8b55d59814e1)
+ ![NO TASK](https://github.com/user-attachments/assets/2018668e-0596-4867-a335-7521b7a2878b)
+
+
 
 ---
 
 ### 5. Daily Report (Bonus)
 - **GET** `/api/tasks/report?date=YYYY-MM-DD`  
 - Returns counts per priority and status for the given day
+![SUMMMARY](https://github.com/user-attachments/assets/ac6dbea8-204c-439e-a6c4-42667ee07b6d)
 
 **Example Response:**
 ```json
